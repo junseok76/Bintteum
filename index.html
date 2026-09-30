@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>빈틈 · 다 같이 비는 시간 찾기</title>
+<meta name="description" content="친구들이 바쁜 시간을 칠하면 다 같이 비는 시간을 찾아줘요.">
+<meta property="og:title" content="빈틈"><meta property="og:description" content="다 같이 비는 시간 찾기">
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+:root{
+  --ground:#F2F4F7; --surface:#FFFFFF; --ink:#18202C; --muted:#5E6878; --line:#D8DDE5;
+  --busy:#AEB6C4; --mark:#FFB21E; --mark-ink:#3A2600; --free0:#FFF4DC;
+  --focus:#2D5BFF;--ok:#16924A;--mid:#B7791F;--no:#D63A3A;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  color-scheme:dark;--ground:#12161D;--surface:#1B212B;--ink:#E9EDF3;--muted:#98A2B3;--line:#2E3643;
+  --busy:#4A5466;--mark:#FFB21E;--mark-ink:#241700;--free0:#2A2618;--focus:#7C9BFF;--ok:#4ADE80;--mid:#FACC15;--no:#F87171;}}
+:root[data-theme="dark"]{
+  color-scheme:dark;--ground:#12161D;--surface:#1B212B;--ink:#E9EDF3;--muted:#98A2B3;--line:#2E3643;
+  --busy:#4A5466;--mark:#FFB21E;--mark-ink:#241700;--free0:#2A2618;--focus:#7C9BFF;--ok:#4ADE80;--mid:#FACC15;--no:#F87171;}
+body{background:var(--ground);color:var(--ink);font:15px/1.55 "IBM Plex Sans KR",system-ui,sans-serif;padding-inline:16px;padding-block:20px 48px}
+.wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.logo{font-family:"Black Han Sans",sans-serif;font-size:34px;letter-spacing:.02em;line-height:1}
+.logo span{background:linear-gradient(transparent 55%,var(--mark) 55%);padding:0 2px}
+.tag{color:var(--muted);font-size:13px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:12px}
+h2{font-size:17px;margin:0;text-wrap:balance}
+p{margin:0}
+.hint{color:var(--muted);font-size:13px}
+input[type=text]{font:inherit;color:var(--ink);background:var(--ground);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;box-sizing:border-box}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>input{flex:1 1 160px}
+button{font:inherit;font-weight:700;border:0;border-radius:8px;padding:10px 16px;cursor:pointer;background:var(--ink);color:var(--ground)}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:disabled{opacity:.5;cursor:default}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.code{font-family:"IBM Plex Mono",monospace;font-size:20px;letter-spacing:.12em;background:var(--ground);border:1px dashed var(--line);border-radius:8px;padding:8px 12px;user-select:all}
+.tabs{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.tabs button{flex:1;border-radius:0;background:transparent;color:var(--muted);font-weight:500}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--ground);font-weight:700}
+.grid{display:grid;grid-template-columns:44px repeat(5,1fr);gap:3px;touch-action:none;user-select:none;font-variant-numeric:tabular-nums}
+.grid .h{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);display:flex;align-items:flex-start;justify-content:flex-end;padding-right:4px;transform:translateY(-7px)}
+.grid .d{text-align:center;font-weight:700;font-size:13px;padding-bottom:2px}
+.c{height:30px;border-radius:4px;background:var(--ground);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer}
+.c.busy{background:var(--busy);border-color:var(--busy);background-image:repeating-linear-gradient(135deg,transparent 0 5px,rgba(0,0,0,.12) 5px 7px)}
+.c b{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:50%;background:var(--surface);font-size:12px;font-weight:700}
+.c.all{background:var(--mark);border-color:var(--mark)}.c.all b{color:var(--ok)}
+.c.hi{background:color-mix(in srgb,var(--mark) 55%,var(--surface));border-color:transparent}
+.c.lo{background:color-mix(in srgb,var(--mark) 20%,var(--surface));border-color:transparent}
+.c.hi b,.c.lo b{color:var(--mid)}
+.grid.hdr .d,.grid.hdr .h{cursor:pointer;border-radius:4px}.grid.hdr .d:hover,.grid.hdr .h:hover{background:var(--line)}
+.grid.hdr .d{text-decoration:underline dotted;text-underline-offset:3px}
+.c.none b{color:var(--no);background:transparent;font-size:14px}
+.lg{font-weight:700}.lg.ok{color:var(--ok)}.lg.mid{color:var(--mid)}.lg.no{color:var(--no)}
+.colors{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.colors button{width:26px;height:26px;padding:0;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line)}
+.colors button[aria-pressed=true]{box-shadow:0 0 0 2px var(--ink)}
+.colors label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.colors input[type=color]{width:30px;height:26px;padding:0;border:1px solid var(--line);border-radius:6px;background:none;cursor:pointer}
+.c.sel{outline:2px solid var(--focus);outline-offset:1px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);align-items:center}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px;border:1px solid var(--line)}
+.top{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.top li{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:6px;background:var(--ground)}
+.top b{font-family:"IBM Plex Mono",monospace;font-weight:500}
+.pill{font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--mark);color:var(--mark-ink);white-space:nowrap}
+.pill.part{background:var(--line);color:var(--ink)}
+.people{display:flex;flex-wrap:wrap;gap:6px}
+.people span{font-size:13px;padding:3px 10px;border-radius:99px;border:1px solid var(--line)}
+.msg{font-size:13px;color:var(--muted);min-height:1.4em}
+.ex{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted)}
+</style>
+
+<div class="wrap">
+  <header><div class="logo"><span>빈틈</span></div><div class="tag">다 같이 비는 시간 찾기</div></header>
+  <div class="colors" id="colors"><span>강조 색</span></div>
+
+  <section id="base" class="panel" hidden>
+    <h2>내 기본 시간표</h2>
+    <p class="hint">이 기기에만 저장돼요. 한 학기 동안 반복되는 <b>바쁜 시간</b>을 한 번만 칠해두세요. 요일이나 시간을 누르면 줄 전체가 한 번에 칠해지고, 다시 누르면 지워져요. 새 모임에 들어가면 이 시간표가 자동으로 채워져요.</p>
+    <input type="text" id="baseName" placeholder="이름" maxlength="20">
+    <div class="grid hdr" id="baseGrid"></div>
+    <div class="row"><button id="baseSave">기본 시간표 저장</button><button class="ghost" id="baseClear">전부 지우기</button></div>
+    <p class="msg" id="baseMsg"></p>
+  </section>
+
+  <section id="home" class="panel" hidden>
+    <h2>새 모임 만들기</h2>
+    <div class="row"><input type="text" id="newName" placeholder="예: 10월 스터디" maxlength="40"><button id="createBtn">방 만들기</button></div>
+    <h2 style="margin-top:8px">코드로 들어가기</h2>
+    <div class="row"><input type="text" id="joinCode" placeholder="방 코드 6자리" maxlength="12" autocomplete="off"><button class="ghost" id="joinBtn">입장</button></div>
+    <p class="msg" id="homeMsg"></p>
+  </section>
+
+  <section id="room" hidden style="display:contents">
+    <div class="panel">
+      <h2 id="roomName">모임</h2>
+      <div class="row" style="align-items:center"><span class="hint">방 코드</span><span class="code" id="roomCode"></span><button class="ghost" id="copyBtn">초대 링크 복사</button></div>
+      <p class="hint">링크를 단톡방에 보내면 친구들이 로그인 없이 바로 들어올 수 있어요.</p>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tabIn" aria-selected="true">내 시간표</button>
+      <button role="tab" id="tabOut" aria-selected="false">결과 보기</button>
+    </div>
+    <div class="panel" id="inPanel">
+      <input type="text" id="myName" placeholder="이름" maxlength="20">
+      <p class="hint" id="inHint">수업·알바 등 <b>바쁜 시간</b>을 칸별로 탭하거나 드래그해서 칠하세요.</p>
+      <div class="grid" id="inGrid"></div>
+      <div class="row"><button id="saveBtn">저장하기</button><button class="ghost" id="resetBtn">기본 시간표로 되돌리기</button><button class="ghost" id="clearBtn">전부 지우기</button></div>
+      <p class="msg" id="inMsg"></p>
+    </div>
+    <div id="outPanel" hidden style="display:contents">
+      <div class="panel">
+        <h2>다 같이 되는 시간</h2>
+        <ul class="top" id="top"></ul>
+      </div>
+      <div class="panel">
+        <div class="legend"><span><i class="sw" style="background:var(--mark)"></i><b class="lg ok">✓</b> 전원 가능</span><span><i class="sw" style="background:color-mix(in srgb,var(--mark) 55%,var(--surface))"></i>절반 이상</span><span><i class="sw" style="background:color-mix(in srgb,var(--mark) 20%,var(--surface))"></i>절반 미만 <b class="lg mid">(숫자 = 가능 인원)</b></span><span><b class="lg no">✕</b> 아무도 안 됨</span></div>
+        <div class="grid" id="outGrid"></div>
+        <p class="msg" id="cellInfo">칸을 누르면 누가 안 되는지 보여줘요.</p>
+      </div>
+      <div class="panel"><h2 id="pcount">참여자</h2><div class="people" id="people"></div></div>
+    </div>
+  </section>
+
+  <section id="demo" class="panel" hidden>
+    <div class="ex">예시 화면</div>
+    <p class="hint">친구 4명 시간표를 모으면 이렇게 보여요.</p>
+    <div class="legend"><span><i class="sw" style="background:var(--mark)"></i><b class="lg ok">✓</b> 전원 가능</span><span><i class="sw" style="background:color-mix(in srgb,var(--mark) 55%,var(--surface))"></i>절반 이상</span><span><i class="sw" style="background:color-mix(in srgb,var(--mark) 20%,var(--surface))"></i>절반 미만 <b class="lg mid">(숫자 = 가능 인원)</b></span><span><b class="lg no">✕</b> 아무도 안 됨</span></div>
+    <div class="grid" id="demoGrid"></div>
+  </section>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getFirestore,doc as fdoc,getDoc,setDoc,collection as fcol,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ▼ Firebase 콘솔에서 복사한 설정으로 이 부분만 바꿔주세요 ▼ */
+const firebaseConfig = {
+  apiKey: "AIzaSyC_2hfcHY8HqczwFf7qruI-v8BsZ_kj-II",
+  authDomain: "bintteum-ca65f.firebaseapp.com",
+  projectId: "bintteum-ca65f",
+  storageBucket: "bintteum-ca65f.firebasestorage.app",
+  messagingSenderId: "886362309830",
+  appId: "1:886362309830:web:5a97165c14bc1ca1cb83c7",
+  measurementId: "G-1TS9DL94LS"
+};
+/* ▲ 여기까지 ▲ */
+
+const DAYS=["월","화","수","목","금"], H0=9, H1=21, HOURS=H1-H0;
+const $=id=>document.getElementById(id);
+let db=null, uid=null, roomId=null, room=null, members=[], busy=new Set(), dirty=false, unsubs=[], sel=null;
+
+function key(d,h){return d+"-"+h}
+function buildGrid(el,onCell){
+  el.innerHTML="";
+  el.appendChild(document.createElement("div"));
+  DAYS.forEach(d=>{const x=document.createElement("div");x.className="d";x.textContent=d;el.appendChild(x)});
+  for(let h=0;h<HOURS;h++){
+    const lab=document.createElement("div");lab.className="h";lab.textContent=(H0+h)+":00";el.appendChild(lab);
+    for(let d=0;d<5;d++){const c=document.createElement("div");c.className="c";c.dataset.k=key(d,h);c.setAttribute("role","button");c.tabIndex=0;
+      c.setAttribute("aria-label",DAYS[d]+"요일 "+(H0+h)+"시");el.appendChild(c);if(onCell)onCell(c)}
+  }
+}
+
+/* editable grid: drag painting, optional row/column header toggles */
+let base={name:"",busy:[]}, baseBusy=new Set(), baseDirty=false;
+function makeEditor(g,getSet,onChange,headers){
+  buildGrid(g);let mode=null;
+  const paint=c=>{if(!c||!c.dataset.k)return;const set=getSet(),k=c.dataset.k,had=set.has(k);
+    if(mode)set.add(k);else set.delete(k);c.classList.toggle("busy",set.has(k));if(had!==set.has(k))onChange()};
+  g.addEventListener("pointerdown",e=>{const c=e.target.closest(".c");if(!c)return;mode=!getSet().has(c.dataset.k);paint(c);g.setPointerCapture(e.pointerId)});
+  g.addEventListener("pointermove",e=>{if(mode===null)return;paint(document.elementFromPoint(e.clientX,e.clientY)?.closest(".c"))});
+  const end=()=>{mode=null};g.addEventListener("pointerup",end);g.addEventListener("pointercancel",end);
+  g.addEventListener("keydown",e=>{if((e.key===" "||e.key==="Enter")&&e.target.classList.contains("c")){e.preventDefault();mode=!getSet().has(e.target.dataset.k);paint(e.target);mode=null}});
+  if(headers){
+    const toggle=keys=>{const set=getSet(),full=keys.every(k=>set.has(k));keys.forEach(k=>full?set.delete(k):set.add(k));paintAll(g,set);onChange()};
+    g.querySelectorAll(".d").forEach((x,d)=>{x.tabIndex=0;x.setAttribute("role","button");x.setAttribute("aria-label",DAYS[d]+"요일 전체 칠하기");
+      const f=()=>toggle([...Array(HOURS)].map((_,h)=>key(d,h)));x.onclick=f;x.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();f()}}});
+    g.querySelectorAll(".h").forEach((x,h)=>{x.tabIndex=0;x.setAttribute("role","button");x.setAttribute("aria-label",(H0+h)+"시 월~금 칠하기");
+      const f=()=>toggle([0,1,2,3,4].map(d=>key(d,h)));x.onclick=f;x.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();f()}}});
+  }
+}
+function paintAll(g,set){g.querySelectorAll(".c").forEach(c=>c.classList.toggle("busy",set.has(c.dataset.k)))}
+function renderInput(){paintAll($("inGrid"),busy)}
+function setupInput(){
+  makeEditor($("inGrid"),()=>busy,()=>{dirty=true;$("inMsg").textContent="저장하지 않은 변경이 있어요."},false);
+  makeEditor($("baseGrid"),()=>baseBusy,()=>{baseDirty=true;$("baseMsg").textContent="저장하지 않은 변경이 있어요."},true);
+}
+
+/* results */
+function freeMap(list){const m={};for(let d=0;d<5;d++)for(let h=0;h<HOURS;h++){const k=key(d,h);m[k]=list.filter(p=>!(p.busy||[]).includes(k))}return m}
+function renderResult(grid,list,interactive){
+  const n=list.length,m=freeMap(list);
+  grid.querySelectorAll(".c").forEach(c=>{const f=m[c.dataset.k].length;c.className="c";c.textContent="";
+    if(!n)return;
+    const b=document.createElement("b");
+    if(f===n){c.classList.add("all");b.textContent="✓"}
+    else if(f>0){c.classList.add(f*2>=n?"hi":"lo");b.textContent=f}
+    else{c.classList.add("none");b.textContent="✕"}
+    c.appendChild(b)
+    if(interactive&&sel===c.dataset.k)c.classList.add("sel")});
+  return m;
+}
+function blocks(list){
+  const n=list.length;if(!n)return{best:0,items:[]};const m=freeMap(list);
+  let best=0;for(const k in m)best=Math.max(best,m[k].length);if(!best)return{best:0,items:[]};
+  const items=[];for(let d=0;d<5;d++){let s=null;for(let h=0;h<=HOURS;h++){const ok=h<HOURS&&m[key(d,h)].length===best;
+    if(ok&&s===null)s=h;if(!ok&&s!==null){items.push({d,s,e:h});s=null}}}
+  items.sort((a,b)=>(b.e-b.s)-(a.e-a.s)||a.d-b.d||a.s-b.s);return{best,items:items.slice(0,3)};
+}
+function renderTop(ul,list){
+  ul.innerHTML="";const n=list.length,{best,items}=blocks(list);
+  if(!n){ul.innerHTML='<li><span class="hint">아직 아무도 저장하지 않았어요.</span></li>';return}
+  if(!items.length){ul.innerHTML='<li><span class="hint">겹치는 빈 시간이 없어요.</span></li>';return}
+  items.forEach(b=>{const li=document.createElement("li");
+    li.innerHTML=`<span>${DAYS[b.d]}요일 <b>${H0+b.s}:00–${H0+b.e}:00</b></span><span class="pill ${best<n?"part":""}">${best===n?"전원 가능":best+"/"+n+"명 가능"}</span>`;ul.appendChild(li)});
+}
+function showCell(k){
+  sel=k;const [d,h]=k.split("-").map(Number);const no=members.filter(p=>(p.busy||[]).includes(k)).map(p=>p.name||"이름 없음");
+  const t=`${DAYS[d]}요일 ${H0+h}:00–${H0+h+1}:00 · `;
+  $("cellInfo").textContent=t+(no.length?"안 되는 사람: "+no.join(", "):members.length?"전원 가능!":"아직 데이터가 없어요.");
+  renderResult($("outGrid"),members,true);
+}
+function renderRoom(){
+  $("roomName").textContent=room?.name||"모임";
+  renderResult($("outGrid"),members,true);renderTop($("top"),members);
+  $("pcount").textContent=`참여자 ${members.length}명`;
+  const pp=$("people");pp.innerHTML="";members.forEach(p=>{const s=document.createElement("span");s.textContent=(p.name||"이름 없음")+(p.id===uid?" (나)":"");pp.appendChild(s)});
+}
+
+/* routing */
+function code(){const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";const r=crypto.getRandomValues(new Uint8Array(6));r.forEach(x=>s+=a[x%a.length]);return s}
+function show(which){$("home").hidden=which!=="home";$("base").hidden=which!=="home";$("room").hidden=which!=="room";$("demo").hidden=which!=="home"}
+async function enter(id){
+  roomId=id;unsubs.forEach(u=>u());unsubs=[];members=[];busy=new Set();dirty=false;sel=null;
+  try{location.hash=id}catch(e){}
+  $("roomCode").textContent=id;show("room");renderInput();renderRoom();
+  const snap=await db.doc("rooms/"+id).get();
+  if(!snap.exists){show("home");$("homeMsg").textContent="그 코드의 방을 찾지 못했어요. 코드를 다시 확인해 주세요.";return}
+  room=snap.data();renderRoom();
+  unsubs.push(db.collection("rooms/"+id+"/members").onSnapshot(s=>{
+    members=s.docs.map(x=>({id:x.id,...x.data()}));
+    const me=members.find(p=>p.id===uid);
+    if(!dirty){
+      if(me){busy=new Set(me.busy||[]);$("inHint").innerHTML="이 모임에만 적용되는 시간표예요. 칸별로 수정해도 <b>기본 시간표는 바뀌지 않아요.</b>";if(!$("myName").value)$("myName").value=me.name||""}
+      else if(base.busy.length){busy=new Set(base.busy);dirty=true;$("inHint").innerHTML="<b>기본 시간표를 불러왔어요.</b> 이번 모임에 맞게 칸별로 수정한 뒤 저장하세요. 기본 시간표는 바뀌지 않아요.";$("inMsg").textContent="아직 이 모임에 저장하지 않았어요.";if(!$("myName").value)$("myName").value=base.name}
+      renderInput()}
+    renderRoom();
+  },e=>{$("inMsg").textContent="데이터를 불러오지 못했어요. 새로고침해 주세요."}));
+}
+function tab(out){$("tabIn").setAttribute("aria-selected",!out);$("tabOut").setAttribute("aria-selected",out);$("inPanel").hidden=out;$("outPanel").hidden=!out}
+
+/* demo */
+function demo(){buildGrid($("demoGrid"));const rnd=s=>()=>(s=(s*9301+49297)%233280)/233280;const r=rnd(7);
+  const list=["민수","지은","하루토","서연"].map(n=>({name:n,busy:[...Array(5)].flatMap((_,d)=>[...Array(HOURS)].map((_,h)=>key(d,h)).filter(()=>r()<.42))}));
+  renderResult($("demoGrid"),list,false)}
+
+$("tabIn").onclick=()=>tab(false);$("tabOut").onclick=()=>tab(true);
+$("outGrid")&&0;
+setupInput();buildGrid($("outGrid"));
+$("outGrid").addEventListener("click",e=>{const c=e.target.closest(".c");if(c)showCell(c.dataset.k)});
+$("outGrid").addEventListener("keydown",e=>{const c=e.target.closest(".c");if(c&&(e.key==="Enter"||e.key===" ")){e.preventDefault();showCell(c.dataset.k)}});
+$("resetBtn").onclick=()=>{busy=new Set(base.busy);dirty=true;renderInput();$("inMsg").textContent=base.busy.length?"기본 시간표로 되돌렸어요. 저장하면 반영돼요.":"아직 기본 시간표가 없어요. 첫 화면에서 설정할 수 있어요."};
+$("baseClear").onclick=()=>{baseBusy.clear();baseDirty=true;paintAll($("baseGrid"),baseBusy);$("baseMsg").textContent="저장하지 않은 변경이 있어요."};
+$("clearBtn").onclick=()=>{busy.clear();dirty=true;renderInput();$("inMsg").textContent="저장하지 않은 변경이 있어요."};
+$("copyBtn").onclick=async()=>{const link=location.origin+location.pathname+"#"+roomId;try{await navigator.clipboard.writeText(link);$("copyBtn").textContent="복사됨"}catch(e){const r=document.createRange();r.selectNodeContents($("roomCode"));getSelection().removeAllRanges();getSelection().addRange(r)}setTimeout(()=>$("copyBtn").textContent="초대 링크 복사",1500)};
+/* per-viewer highlight color */
+const PRESETS=["#FFB21E","#4FC3A1","#5B8CFF","#FF6F91","#A77BFF"];
+function applyColor(hex){
+  const n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255,lum=(0.299*r+0.587*g+0.114*b)/255;
+  const s=document.documentElement.style;s.setProperty("--mark",hex);s.setProperty("--mark-ink",lum>.6?"#241700":"#FFFFFF");
+  document.querySelectorAll("#colors button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.c===hex));
+  $("customColor").value=hex;try{localStorage.setItem("bintteum-color",hex)}catch(e){}
+}
+PRESETS.forEach(c=>{const b=document.createElement("button");b.dataset.c=c;b.style.background=c;b.setAttribute("aria-label","강조 색 "+c);b.onclick=()=>applyColor(c);$("colors").appendChild(b)});
+{const l=document.createElement("label");l.innerHTML='직접 <input type="color" id="customColor">';$("colors").appendChild(l);
+ $("customColor").addEventListener("input",e=>applyColor(e.target.value.toUpperCase()))}
+{let c=null;try{c=localStorage.getItem("bintteum-color")}catch(e){}applyColor(/^#[0-9A-F]{6}$/i.test(c||"")?c.toUpperCase():PRESETS[0])}
+demo();show("home");
+$("createBtn").disabled=$("joinBtn").disabled=true;$("homeMsg").textContent="연결하는 중…";
+
+(async()=>{
+  if(!firebaseConfig.projectId){$("homeMsg").textContent="Firebase 설정이 아직 없어요. index.html 위쪽의 firebaseConfig를 채워주세요.";return}
+  const fdb=getFirestore(initializeApp(firebaseConfig));
+  db={doc:p=>({get:async()=>{const s=await getDoc(fdoc(fdb,p));return{exists:s.exists(),data:()=>s.data()}},set:d=>setDoc(fdoc(fdb,p),d)}),
+      collection:p=>({onSnapshot:(n,e)=>onSnapshot(fcol(fdb,p),s=>n({docs:s.docs.map(x=>({id:x.id,data:()=>x.data()}))}),e)})};
+  const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+  uid=store.get("bintteum-uid");if(!uid){uid="m"+Array.from(crypto.getRandomValues(new Uint8Array(9)),x=>x.toString(16).padStart(2,"0")).join("");store.set("bintteum-uid",uid)}
+  $("createBtn").disabled=$("joinBtn").disabled=false;$("homeMsg").textContent="";
+  try{const b=JSON.parse(store.get("bintteum-base")||"null");if(b){base={name:b.name||"",busy:b.busy||[]};baseBusy=new Set(base.busy);$("baseName").value=base.name;paintAll($("baseGrid"),baseBusy)}}catch(e){}
+  $("baseSave").onclick=()=>{const name=$("baseName").value.trim(),busyArr=[...baseBusy].sort();base={name,busy:busyArr};store.set("bintteum-base",JSON.stringify(base));baseDirty=false;
+    $("baseMsg").textContent="이 기기에 저장했어요. 새 모임에 들어가면 자동으로 채워져요."};
+  $("createBtn").onclick=async()=>{const name=$("newName").value.trim()||"우리 모임";const id=code();
+    $("createBtn").disabled=true;try{await db.doc("rooms/"+id).set({name,createdAt:Date.now()});enter(id)}
+    catch(e){$("homeMsg").textContent="방을 만들지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요."}
+    $("createBtn").disabled=false};
+  $("joinBtn").onclick=()=>{const c=$("joinCode").value.trim().toUpperCase();if(/^[A-Z0-9]{4,12}$/.test(c))enter(c);else $("homeMsg").textContent="방 코드를 확인해 주세요."};
+  $("saveBtn").onclick=async()=>{const name=$("myName").value.trim();if(!name){$("inMsg").textContent="이름을 먼저 적어주세요.";$("myName").focus();return}
+    $("saveBtn").disabled=true;try{await db.doc(`rooms/${roomId}/members/${uid}`).set({name,busy:[...busy].sort(),updatedAt:Date.now()});dirty=false;$("inMsg").textContent="저장했어요. 결과 탭에서 확인해 보세요.";tab(true)}
+    catch(e){$("inMsg").textContent="저장하지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요."}
+    $("saveBtn").disabled=false};
+  const h=(location.hash||"").slice(1).toUpperCase();if(/^[A-Z0-9]{4,12}$/.test(h))enter(h);
+  addEventListener("hashchange",()=>{const h=(location.hash||"").slice(1).toUpperCase();if(/^[A-Z0-9]{4,12}$/.test(h)&&h!==roomId)enter(h)});
+})();
+</script>
+</body>
+</html>
