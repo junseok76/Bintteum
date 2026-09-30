@@ -44,19 +44,33 @@ button:disabled{opacity:.5;cursor:default}
 .tabs{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .tabs button{flex:1;border-radius:0;background:transparent;color:var(--muted);font-weight:500}
 .tabs button[aria-selected=true]{background:var(--ink);color:var(--ground);font-weight:700}
-.grid{display:grid;grid-template-columns:44px repeat(5,1fr);gap:3px;touch-action:none;user-select:none;font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:44px repeat(5,1fr);gap:0;grid-template-rows:auto repeat(12,34px);touch-action:none;user-select:none;font-variant-numeric:tabular-nums}
 .grid .h{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);display:flex;align-items:flex-start;justify-content:flex-end;padding-right:4px;transform:translateY(-7px)}
 .grid .d{text-align:center;font-weight:700;font-size:13px;padding-bottom:2px}
-.c{height:30px;border-radius:4px;background:var(--ground);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer}
-.c.busy{background:var(--busy);border-color:var(--busy);background-image:repeating-linear-gradient(135deg,transparent 0 5px,rgba(0,0,0,.12) 5px 7px)}
+.c{-webkit-tap-highlight-color:transparent;outline:none;height:34px;box-sizing:border-box;border-radius:0;background:var(--surface);border:0;border-top:1px solid var(--line);border-left:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer}
+.c.busy{background:var(--surface)!important;background-image:none!important;border-color:var(--line)!important;}
+.c.last{border-right:1px solid var(--line)}.c.bot{border-bottom:1px solid var(--line)}
+.old-busy{background:var(--busy);border-color:var(--busy);background-image:repeating-linear-gradient(135deg,transparent 0 5px,rgba(0,0,0,.12) 5px 7px)}
 .c b{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:50%;background:var(--surface);font-size:12px;font-weight:700}
 .c.all{background:var(--mark);border-color:var(--mark)}.c.all b{color:var(--ok)}
 .c.hi{background:color-mix(in srgb,var(--mark) 55%,var(--surface));border-color:transparent}
 .c.lo{background:color-mix(in srgb,var(--mark) 20%,var(--surface));border-color:transparent}
 .c.hi b,.c.lo b{color:var(--mid)}
-.grid.hdr .d,.grid.hdr .h{cursor:pointer;border-radius:4px}.grid.hdr .d:hover,.grid.hdr .h:hover{background:var(--line)}
+.grid.hdr .d,.grid.hdr .h{cursor:pointer;border-radius:6px;margin:2px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.grid.hdr .h{transform:none;align-items:center;justify-content:center;padding-right:0;background:var(--ground);border:1px solid var(--line)}
+.grid.hdr .d{padding-block:6px;background:var(--ground);border:1px solid var(--line)}.grid.hdr .d:hover,.grid.hdr .h:hover{background:var(--line)}
 .grid.hdr .d{text-decoration:underline dotted;text-underline-offset:3px}
-.c.none b{color:var(--no);background:transparent;font-size:14px}
+.blk{pointer-events:none;position:relative;z-index:1;margin:2px;border-radius:7px;padding:3px 5px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;gap:2px;font-size:11px;line-height:1.2;overflow:hidden;min-width:0}
+.blk .lab{display:flex;align-items:center;gap:2px;font-weight:700;white-space:nowrap}
+.blk small{font-family:"IBM Plex Mono",monospace;font-size:10px;opacity:.85;white-space:nowrap}
+.blk b{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;border-radius:50%;background:var(--surface);font-size:11px}
+.blk.mine{background:color-mix(in srgb,var(--mark) 40%,var(--surface));color:var(--ink)}
+.blk.all{background:var(--mark);color:var(--mark-ink)}.blk.all b{color:var(--ok)}
+.blk.hi{background:color-mix(in srgb,var(--mark) 55%,var(--surface));color:var(--ink)}
+.blk.lo{background:color-mix(in srgb,var(--mark) 20%,var(--surface));color:var(--ink)}
+.blk.hi b,.blk.lo b{color:var(--mid)}
+.blk.sel{outline:2px solid var(--focus);outline-offset:0}
+.c.none b{opacity:.55;color:var(--no);background:transparent;font-size:14px}
 .lg{font-weight:700}.lg.ok{color:var(--ok)}.lg.mid{color:var(--mid)}.lg.no{color:var(--no)}
 .colors{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
 .colors button{width:26px;height:26px;padding:0;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line)}
@@ -110,8 +124,8 @@ button:disabled{opacity:.5;cursor:default}
     </div>
     <div class="panel" id="inPanel">
       <input type="text" id="myName" placeholder="이름" maxlength="20">
-      <p class="hint" id="inHint">수업·알바 등 <b>바쁜 시간</b>을 칸별로 탭하거나 드래그해서 칠하세요.</p>
-      <div class="grid" id="inGrid"></div>
+      <p class="hint" id="inHint">수업·알바 등 <b>바쁜 시간</b>을 칠하세요. 요일이나 시간을 누르면 줄 전체가 칠해져요.</p>
+      <div class="grid hdr" id="inGrid"></div>
       <div class="row"><button id="saveBtn">저장하기</button><button class="ghost" id="resetBtn">기본 시간표로 되돌리기</button><button class="ghost" id="clearBtn">전부 지우기</button></div>
       <p class="msg" id="inMsg"></p>
     </div>
@@ -160,11 +174,12 @@ let db=null, uid=null, roomId=null, room=null, members=[], busy=new Set(), dirty
 function key(d,h){return d+"-"+h}
 function buildGrid(el,onCell){
   el.innerHTML="";
-  el.appendChild(document.createElement("div"));
-  DAYS.forEach(d=>{const x=document.createElement("div");x.className="d";x.textContent=d;el.appendChild(x)});
+  const at=(x,r,c)=>{x.style.gridRow=r;x.style.gridColumn=c;el.appendChild(x)};
+  at(document.createElement("div"),1,1);
+  DAYS.forEach((d,i)=>{const x=document.createElement("div");x.className="d";x.textContent=d;at(x,1,i+2)});
   for(let h=0;h<HOURS;h++){
-    const lab=document.createElement("div");lab.className="h";lab.textContent=(H0+h)+":00";el.appendChild(lab);
-    for(let d=0;d<5;d++){const c=document.createElement("div");c.className="c";c.dataset.k=key(d,h);c.setAttribute("role","button");c.tabIndex=0;
+    const lab=document.createElement("div");lab.className="h";lab.textContent=(H0+h)+":00";at(lab,h+2,1);
+    for(let d=0;d<5;d++){const c=document.createElement("div");c.className="c"+(d===4?" last":"")+(h===HOURS-1?" bot":"");c.dataset.k=key(d,h);c.setAttribute("role","button");c.tabIndex=0;c.style.gridRow=h+2;c.style.gridColumn=d+2;
       c.setAttribute("aria-label",DAYS[d]+"요일 "+(H0+h)+"시");el.appendChild(c);if(onCell)onCell(c)}
   }
 }
@@ -174,23 +189,29 @@ let base={name:"",busy:[]}, baseBusy=new Set(), baseDirty=false;
 function makeEditor(g,getSet,onChange,headers){
   buildGrid(g);let mode=null;
   const paint=c=>{if(!c||!c.dataset.k)return;const set=getSet(),k=c.dataset.k,had=set.has(k);
-    if(mode)set.add(k);else set.delete(k);c.classList.toggle("busy",set.has(k));if(had!==set.has(k))onChange()};
+    if(mode)set.add(k);else set.delete(k);if(had!==set.has(k)){paintAll(g,set);onChange()}};
   g.addEventListener("pointerdown",e=>{const c=e.target.closest(".c");if(!c)return;mode=!getSet().has(c.dataset.k);paint(c);g.setPointerCapture(e.pointerId)});
   g.addEventListener("pointermove",e=>{if(mode===null)return;paint(document.elementFromPoint(e.clientX,e.clientY)?.closest(".c"))});
   const end=()=>{mode=null};g.addEventListener("pointerup",end);g.addEventListener("pointercancel",end);
-  g.addEventListener("keydown",e=>{if((e.key===" "||e.key==="Enter")&&e.target.classList.contains("c")){e.preventDefault();mode=!getSet().has(e.target.dataset.k);paint(e.target);mode=null}});
+  g.addEventListener("keydown",e=>{if((e.key===" "||e.key==="Enter")&&e.target.classList.contains("c")){e.preventDefault();const k=e.target.dataset.k;mode=!getSet().has(k);paint(e.target);mode=null;g.querySelector(`.c[data-k="${k}"]`)?.focus()}});
   if(headers){
     const toggle=keys=>{const set=getSet(),full=keys.every(k=>set.has(k));keys.forEach(k=>full?set.delete(k):set.add(k));paintAll(g,set);onChange()};
     g.querySelectorAll(".d").forEach((x,d)=>{x.tabIndex=0;x.setAttribute("role","button");x.setAttribute("aria-label",DAYS[d]+"요일 전체 칠하기");
-      const f=()=>toggle([...Array(HOURS)].map((_,h)=>key(d,h)));x.onclick=f;x.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();f()}}});
+      const f=()=>toggle([...Array(HOURS)].map((_,h)=>key(d,h)));x.addEventListener("pointerup",e=>{e.preventDefault();f()});x.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();f()}}});
     g.querySelectorAll(".h").forEach((x,h)=>{x.tabIndex=0;x.setAttribute("role","button");x.setAttribute("aria-label",(H0+h)+"시 월~금 칠하기");
-      const f=()=>toggle([0,1,2,3,4].map(d=>key(d,h)));x.onclick=f;x.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();f()}}});
+      const f=()=>toggle([0,1,2,3,4].map(d=>key(d,h)));x.addEventListener("pointerup",e=>{e.preventDefault();f()});x.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();f()}}});
   }
 }
-function paintAll(g,set){g.querySelectorAll(".c").forEach(c=>c.classList.toggle("busy",set.has(c.dataset.k)))}
+function addBlock(g,d,s,e,cls,html){const b=document.createElement("div");b.className="blk "+cls;b.style.gridColumn=d+2;b.style.gridRow=(s+2)+" / "+(e+2);b.innerHTML=html;g.appendChild(b);return b}
+function paintAll(g,set){
+  g.querySelectorAll(".blk").forEach(b=>b.remove());
+  g.querySelectorAll(".c").forEach(c=>c.classList.toggle("busy",set.has(c.dataset.k)));
+  for(let d=0;d<5;d++){let h=0;while(h<HOURS){if(!set.has(key(d,h))){h++;continue}const s0=h;while(h<HOURS&&set.has(key(d,h)))h++;
+    addBlock(g,d,s0,h,"mine",h-s0>=2?`<span class="lab">바쁨</span><small>${H0+s0}–${H0+h}</small>`:`<span class="lab">${H0+s0}–${H0+h}</span>`)}}
+}
 function renderInput(){paintAll($("inGrid"),busy)}
 function setupInput(){
-  makeEditor($("inGrid"),()=>busy,()=>{dirty=true;$("inMsg").textContent="저장하지 않은 변경이 있어요."},false);
+  makeEditor($("inGrid"),()=>busy,()=>{dirty=true;$("inMsg").textContent="저장하지 않은 변경이 있어요."},true);
   makeEditor($("baseGrid"),()=>baseBusy,()=>{baseDirty=true;$("baseMsg").textContent="저장하지 않은 변경이 있어요."},true);
 }
 
@@ -198,14 +219,15 @@ function setupInput(){
 function freeMap(list){const m={};for(let d=0;d<5;d++)for(let h=0;h<HOURS;h++){const k=key(d,h);m[k]=list.filter(p=>!(p.busy||[]).includes(k))}return m}
 function renderResult(grid,list,interactive){
   const n=list.length,m=freeMap(list);
-  grid.querySelectorAll(".c").forEach(c=>{const f=m[c.dataset.k].length;c.className="c";c.textContent="";
-    if(!n)return;
-    const b=document.createElement("b");
-    if(f===n){c.classList.add("all");b.textContent="✓"}
-    else if(f>0){c.classList.add(f*2>=n?"hi":"lo");b.textContent=f}
-    else{c.classList.add("none");b.textContent="✕"}
-    c.appendChild(b)
-    if(interactive&&sel===c.dataset.k)c.classList.add("sel")});
+  grid.querySelectorAll(".blk").forEach(b=>b.remove());
+  const [sd,sh]=(interactive&&sel)?sel.split("-").map(Number):[-1,-1];
+  grid.querySelectorAll(".c").forEach(c=>{c.classList.remove("none","sel");c.textContent="";
+    if(n&&m[c.dataset.k].length===0){c.classList.add("none");c.innerHTML="<b>✕</b>";if(c.dataset.k===sel&&interactive)c.classList.add("sel")}});
+  if(!n)return m;
+  for(let d=0;d<5;d++){let h=0;while(h<HOURS){const f=m[key(d,h)].length;if(!f){h++;continue}const s0=h;while(h<HOURS&&m[key(d,h)].length===f)h++;
+    const all=f===n,cls=all?"all":(f*2>=n?"hi":"lo");
+    const html=(all?'<span class="lab"><b>✓</b>전원</span>':`<span class="lab"><b>${f}</b>/${n}명</span>`)+(h-s0>=2?`<small>${H0+s0}–${H0+h}</small>`:"");
+    const bl=addBlock(grid,d,s0,h,cls,html);if(d===sd&&sh>=s0&&sh<h)bl.classList.add("sel")}}
   return m;
 }
 function blocks(list){
